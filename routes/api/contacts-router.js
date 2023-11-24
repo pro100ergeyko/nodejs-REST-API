@@ -8,7 +8,11 @@ import { validateBody } from "../../decorators/index.js";
 
 import { schemas } from "../../models/Contact.js";
 
+import { authenticate } from "../../middlewares/index.js";
+
 const contactsRouter = express.Router();
+
+contactsRouter.use(authenticate);
 
 contactsRouter.get("/", contactsController.getAllContacts);
 
