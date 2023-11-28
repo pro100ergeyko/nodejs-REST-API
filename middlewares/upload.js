@@ -7,7 +7,7 @@ const avatarSize = 1048576;
 
 const multerConfig = multer.diskStorage({
   destination: tempPath,
-  filename: (req, res, cb) => {
+  filename: (req, file, cb) => {
     cb(null, file.originalname);
   },
   limits: {
