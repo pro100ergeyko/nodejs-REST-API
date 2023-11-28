@@ -4,11 +4,19 @@ import jwt from "jsonwebtoken";
 
 import User from "../models/User.js";
 
+import path from "path";
+
+import fs from "fs/promises";
+
+import Jimp from "jimp";
+
 import { ctrlWrapper } from "../decorators/index.js";
 
 import { HttpError } from "../helpers/index.js";
 
 const { JWT_SECRET } = process.env;
+
+const avatarPath = path.resolve("public", "avatars");
 
 const singUp = async (req, res) => {
   const { email, password } = req.body;
@@ -83,10 +91,39 @@ const updateSubscription = async (req, res) => {
   res.json(result);
 };
 
+const updateAvatar = async (req, res, next) => {
+  if (!req.file) {
+    throw HttpError(400, "Avatar must be provided");
+  }
+
+  const { _id } = req.user;
+  const { path: tempUpload, originalname } = req.file;
+
+  await Jimp.read(tempUpload)
+    .then((avatar) => {
+      return avatar.resize(250, 250).quality(60).write(tempUpload);
+    })
+    .catch((error) => {
+      throw error;
+    });
+
+  const fileName = `${_id}_${originalname}`;
+  const publicUpload = path.join(avatarPath, fileName);
+  await fs.rename(tempUpload, publicUpload);
+
+  const avatarURL = path.join("avatars", fileName);
+  await User.findByIdAndUpdate(_id, { avatarURL });
+
+  res.json({
+    avatarURL,
+  });
+};
+
 export default {
   signUp: ctrlWrapper(singUp),
   signIn: ctrlWrapper(singIn),
   getCurrent: ctrlWrapper(getCurrent),
   logOut: ctrlWrapper(logOut),
   updateSubscription: ctrlWrapper(updateSubscription),
+  updateAvatar: ctrlWrapper(updateAvatar),
 };

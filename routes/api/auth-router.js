@@ -6,7 +6,7 @@ import {
   updateSubscriptionSchema,
 } from "../../models/User.js";
 
-import { isEmptyBody, authenticate } from "../../middlewares/index.js";
+import { isEmptyBody, authenticate, upload } from "../../middlewares/index.js";
 
 import { validateBody } from "../../decorators/index.js";
 
@@ -37,6 +37,13 @@ authRouter.patch(
   authenticate,
   validateBody(updateSubscriptionSchema),
   authController.updateSubscription
+);
+
+authRouter.patch(
+  "/avatars",
+  authenticate,
+  upload.single("avatar"),
+  authController.updateAvatar
 );
 
 export default authRouter;
