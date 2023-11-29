@@ -10,6 +10,8 @@ import fs from "fs/promises";
 
 import Jimp from "jimp";
 
+import gravatar from "gravatar";
+
 import { ctrlWrapper } from "../decorators/index.js";
 
 import { HttpError } from "../helpers/index.js";
@@ -26,7 +28,14 @@ const singUp = async (req, res) => {
     throw HttpError(409, `${email} in use`);
   }
   const hashPassword = await bcrypt.hash(password, 10);
-  const result = await User.create({ ...req.body, password: hashPassword });
+
+  const avatarURL = gravatar.url(email);
+
+  const result = await User.create({
+    ...req.body,
+    password: hashPassword,
+    avatarURL,
+  });
 
   res.status(201).json({
     user: { email: result.email, subscription: result.subscription },
@@ -91,7 +100,7 @@ const updateSubscription = async (req, res) => {
   res.json(result);
 };
 
-const updateAvatar = async (req, res, next) => {
+const updateAvatar = async (req, res) => {
   if (!req.file) {
     throw HttpError(400, "Avatar must be provided");
   }
@@ -111,7 +120,7 @@ const updateAvatar = async (req, res, next) => {
   const publicUpload = path.join(avatarPath, fileName);
   await fs.rename(tempUpload, publicUpload);
 
-  const avatarURL = path.join("avatars", fileName);
+  const avatarURL = path.join("public", "avatars", fileName);
   await User.findByIdAndUpdate(_id, { avatarURL });
 
   res.json({
