@@ -2,6 +2,7 @@ import express from "express";
 
 import {
   singUpSchema,
+  userEmailSchema,
   signInSchema,
   updateSubscriptionSchema,
 } from "../../models/User.js";
@@ -19,6 +20,14 @@ authRouter.post(
   isEmptyBody,
   validateBody(singUpSchema),
   authController.signUp
+);
+
+authRouter.get("/verify/:verificationToken", authController.verify);
+
+authRouter.post(
+  "/verify",
+  validateBody(userEmailSchema),
+  authController.resendVerify
 );
 
 authRouter.post(
