@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import "dotenv/config";
 
 const { UKR_NET_EMAIL, UKR_NET_PASSWORD } = process.env;
 
@@ -15,8 +16,8 @@ const nodemailerConfig = {
 const transport = nodemailer.createTransport(nodemailerConfig);
 
 const sendEmail = async (data) => {
-  const { email } = { ...data, from: UKR_NET_EMAIL };
-  await transport.sendMail(email);
+  const emailConfig = { ...data, from: UKR_NET_EMAIL };
+  await transport.sendMail(emailConfig);
   return true;
 };
 
