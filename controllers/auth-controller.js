@@ -43,7 +43,7 @@ const singUp = async (req, res) => {
   const verifyEmail = {
     to: email,
     subject: "Сonfirm your registration",
-    html: `<a target="_blank" href="${BASE_URL}/api/auth/verify/${verificationToken}">Click to confirm your registration</a>`,
+    html: `<a target="_blank" href="${BASE_URL}/users/verify/${verificationToken}">Click to confirm your registration</a>`,
   };
 
   await sendEmail(verifyEmail);
@@ -57,6 +57,7 @@ const verify = async (req, res) => {
   const { verificationToken } = req.params;
 
   const user = await User.findOne({ verificationToken });
+
   if (!user) {
     throw HttpError(404, "User not found");
   }
@@ -86,7 +87,7 @@ const resendVerify = async (req, res) => {
   const verifyEmail = {
     to: email,
     subject: "Сonfirm your registration",
-    html: `<a target="_blank" href="${BASE_URL}/api/auth/verify/${verificationToken}">Click to confirm your registration</a>`,
+    html: `<a target="_blank" href="${BASE_URL}/users/verify/${user.verificationToken}">Click to confirm your registration</a>`,
   };
 
   await sendEmail(verifyEmail);
@@ -101,6 +102,10 @@ const singIn = async (req, res) => {
   const user = await User.findOne({ email });
   if (!user) {
     throw HttpError(401, "Email or password is wrong");
+  }
+
+  if (!user.verify) {
+    throw HttpError(401, "User not found");
   }
 
   const passwordCompare = await bcrypt.compare(password, user.password);
